@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.SetmealDao">
+
+    <insert id="add" parameterType="setmeal" useGeneratedKeys="true" keyProperty="id">
+        insert into t_setmeal(name,code,helpCode,sex,age,price,remark,attention,img)
+        values( #{name},#{code},#{helpCode},#{sex},#{age},#{price},#{remark},#{attention},#{img})
+    </insert>
+
+
+    <insert id="addSetmealAndTravelGroup" parameterType="map" >
+        insert into t_setmeal_travelgroup(setmeal_id,travelgroup_id) values(#{setmealId},#{travelgroupId})
+    </insert>
+
+    <select id="findPage" parameterType="string" resultType="setmeal">
+        select * from t_setmeal
+        <where>
+            <if test="value!=null and value.length>0">
+                code=#{value} or name like concat("%",#{value},"%") or helpCode=#{value}
+            </if>
+        </where>
+    </select>
+
+    <select id="getById" parameterType="integer" resultType="setmeal">
+        select * from t_setmeal where id = #{id}
+    </select>
+
+    <select id="getTravelGroupIdsBySetmealId" parameterType="integer" resultType="integer">
+        select travelgroup_id from t_setmeal_travelgroup where setmeal_id = #{id}
+    </select>
+
+    <delete id="delete" parameterType="integer">
+        delete from t_setmeal_travelgroup where setmeal_id = #{id}
+    </delete>
+
+    <update id="edit" parameterType="setmeal">
+        update t_setmeal
+        <set>
+            <if test="name!=null and name.length>0">
+                name=#{name},
+            </if>
+            <if test="code!=null and code.length>0">
+                code=#{code},
+            </if>
+            <if test="helpCode!=null and helpCode.length>0">
+                helpCode=#{helpCode},
+            </if>
+            <if test="sex!=null and sex.length>0">
+                sex=#{sex},
+            </if>
+            <if test="age!=null and age.length>0">
+                age=#{age},
+            </if>
+            <if test="price!=null">
+                price=#{price},
+            </if>
+            <if test="remark!=null and remark.length>0">
+                remark=#{remark},
+            </if>
+            <if test="attention!=null and attention.length>0">
+                attention=#{attention},
+            </if>
+            <if test="img!=null and img.length>0">
+                img=#{img},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--根据套餐预约id查询中间关系-->
+    <select id="findCountBySetmealId" parameterType="integer" resultType="long">
+        select count(*) from t_setmeal_travelgroup where setmeal_id = #{id}
+    </select>
+
+    <delete id="del" parameterType="integer">
+        delete from t_setmeal where id =#{id}
+    </delete>
+
+<!--    查询所有-->
+    <select id="getSetmeal" resultType="setmeal">
+        select * from t_setmeal
+    </select>
+
+    <resultMap id="SetmealResultMap" type="setmeal">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="code" column="code"></result>
+        <result property="helpCode" column="helpCode"></result>
+        <result property="sex" column="sex"></result>
+        <result property="age" column="age"></result>
+        <result property="price" column="price"></result>
+        <result property="remark" column="remark"></result>
+        <result property="attention" column="attention"></result>
+        <result property="img" column="img"></result>
+        <!--关联集合属性：借助关联数据对应接口方法来帮我们进行数据封装-->
+        <collection property="travelGroups" column="id"
+                    select="com.atguigu.dao.TravelGroupDao.findTravelGroupById"></collection>
+    </resultMap>
+    <select id="findById" parameterType="integer" resultMap="SetmealResultMap">
+       select * from t_setmeal where id = #{id}
+    </select>
+
+    <!--做详情页展示-->
+    <select id="getSetmeakById" parameterType="integer" resultType="setmeal">
+       select * from t_setmeal where id = #{id}
+    </select>
+
+    <select id="getSetmealReport" resultType="map">
+        select s.name name,count(s.id) value
+        from t_setmeal s,t_order o where s.id = o.setmeal_id
+        group BY s.name
+        <!--limit 0,6-->
+    </select>
+</mapper>

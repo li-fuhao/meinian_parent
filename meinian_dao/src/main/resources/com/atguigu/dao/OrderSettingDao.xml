@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.OrderSettingDao">
+
+    <!--新增-->
+    <insert id="add" parameterType="orderSetting">
+        insert into t_ordersetting(orderDate,number,reservations)
+        values(#{orderDate},#{number},#{reservations})
+    </insert>
+
+    <!--根据日期更新预约人数-->
+    <update id="editNumberByOrderDate" parameterType="orderSetting">
+        update t_ordersetting set number = #{number} where orderDate = #{orderDate}
+    </update>
+
+<!--    根据预约日期查询-->
+    <select id="findOrderSettingByOrderDate" parameterType="date" resultType="int">
+        select count(*) from t_ordersetting where orderDate = #{orderDate}
+    </select>
+    <!--根据月份查询预约设置信息
+也可以使用sql语句：SELECT * FROM t_ordersetting WHERE orderDate LIKE '2021-01-%'
+-->
+    <select id="getOrderSettingByMonth" parameterType="map" resultType="orderSetting">
+        select * from t_ordersetting where orderDate between #{startDate} and #{endDate}
+    </select>
+<!--    // 1. 判断当前的日期是否可以预约(根据orderDate查询t_ordersetting, 能查询出来可以预约;查询不出来,不能预约)-->
+    <select id="getOrderSettingByOrderDate" parameterType="date" resultType="orderSetting">
+        select * from t_ordersetting where orderDate = #{date}
+    </select>
+<!--    进行预约 t_ordersetting表里面预约的人数reservations+1-->
+    <update id="editReservationsByOrderDate" parameterType="orderSetting">
+        update t_ordersetting set reservations = #{reservations} where orderDate = #{orderDate}
+    </update>
+
+
+</mapper>
